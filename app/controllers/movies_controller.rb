@@ -7,10 +7,19 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @selected_ratings = params[:ratings].nil? ? Movie.all_ratings : params[:ratings].keys
+
+    if !params[:ratings].nil?
+      @selected_ratings = params[:ratings].keys
+    elsif !session.fetch(:params.to_s, {}).fetch(:ratings.to_s, nil).nil?
+      redirect_to movies_url(session[:params])
+      return #the action will continue to execute without this
+    end
+
+    @selected_ratings ||= Movie.all_ratings
+
+    session[:params] = params
 
     sort_by = params[:sort_by]
-
     if sort_by.eql? 'title'
       @movies = Movie.find(:all, :order => :title)
       @sort_by = :title
