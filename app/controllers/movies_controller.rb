@@ -7,7 +7,26 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @selected_ratings = params[:ratings].nil? ? Movie.all_ratings : params[:ratings].keys
+
+    sort_by = params[:sort_by]
+
+    if sort_by.eql? 'title'
+      @movies = Movie.find(:all, :order => :title)
+      @sort_by = :title
+    elsif sort_by.eql? 'release_date'
+      @movies = Movie.find(:all, :order => :release_date)
+      @sort_by = :release_date
+    else
+      @movies = Movie.where(:rating => [@selected_ratings])
+    end
+
+    all_ratings = Movie.all_ratings
+    @checked_ratings = Hash.new
+    all_ratings.each do |rating| 
+      @checked_ratings[rating.to_sym] = @selected_ratings.include? rating
+    end
+
   end
 
   def new
